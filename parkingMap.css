@@ -1,5 +1,14 @@
 #map {
-    width: 1200px;
-    height: 600px;
-  }
-  
+    margin-top: 18px;
+    width: 70vw; /* 100vw = 100% of the viewport width */
+    height: 70vh; /* 100vh = 100% of the viewport height */
+    border-radius: 1%;
+}
+
+#h1{
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+#submitText{
+    font-family:Arial, Helvetica, sans-serif;
+}

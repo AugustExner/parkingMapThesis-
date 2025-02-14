@@ -31,7 +31,8 @@
                 {
                     "spotID": 6,
                     "latitude": 56.173342,
-                    "longitude": 10.188527
+                    "longitude": 10.188527,
+                    "occipied": false
                 },
                 {
                     "spotID": 7,
