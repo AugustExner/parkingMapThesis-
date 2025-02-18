@@ -88,7 +88,8 @@ function showParkingSpots() {
     const circle = createParkingCircle(
       parkingSpot.latitude,
       parkingSpot.longitude,
-      parkingSpot.spotID
+      parkingSpot.spotID,
+      parkingSpot.occupied
     );
     parkingCircles[parkingSpot.spotID] = circle; // Store circle with SpotID as key
     //console.log(`Created circle for SpotID: ${parkingSpot.spotID}`); // Debugging
@@ -131,17 +132,22 @@ function updateCircleColor(spotID) {
   console.log(`Changed color of circle with SpotID: ${spotID} to ${newColor}`); // Debugging
 }
 
-// 5. Function to create a parking circle and return it
-function createParkingCircle(lat, lng, spotID) {
+// 5. Function to create a parking circle and return it, based on occupancy
+function createParkingCircle(lat, lng, spotID, occupied) {
+  // Determine the color based on the occupancy status
+  const circleColor = occupied ? "red" : "blue"; // Red if occupied, Blue if not
+
+  // Create the circle with the appropriate color
   const circle = L.circle([lat, lng], {
-    color: "red", // Initial color is red
-    fillColor: "#f03",
+    color: circleColor, // Set circle color based on occupancy
+    fillColor: circleColor === "red" ? "#f03" : "#3388ff", // Red fill for occupied, blue for available
     fillOpacity: 0.5,
     radius: 2,
   }).addTo(map);
 
-  parkingCircles[spotID] = circle; // Store circle with SpotID
-  console.log(`Circle for SpotID ${spotID} created`); // Debugging
+  // Store the circle with SpotID
+  parkingCircles[spotID] = circle;
+  console.log(`Circle for SpotID ${spotID} created with color ${circleColor}`); // Debugging
   return circle; // Return the created circle
 }
 
