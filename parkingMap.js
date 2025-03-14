@@ -1,4 +1,4 @@
-const map = L.map("map").setView([56.17254, 10.189626], 18 );
+const map = L.map("map").setView([56.17254, 10.189626], 18);
 let parkingSpots = [];
 let parkingCircles = {}; // Store circles by SpotID
 
@@ -10,40 +10,65 @@ function init() {
   setupTileLayer();
 }
 
-//Fetch parkingdata from API
+// Fetch parking data from API
 async function fetchParkingSpots() {
   try {
     const response = await fetch("http://localhost:3000/getParkingspots");
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
     const data = await response.json();
-    parkingSpots = Object.values(data).flat(); // Flatten all street arrays
+    
+    // Extract all parking spots from nested structure
+    parkingSpots = extractParkingSpots(data);
 
-    console.log("Fetched parking spots:", parkingSpots);
-    displayParkingSpots();
+    console.log("Total parking spots fetched:", parkingSpots.length);
+    updateParkingSpots();
   } catch (error) {
     console.error("Error fetching parking spots:", error);
   }
 }
 
-//Function that creates a circle for each parkingspot
-function displayParkingSpots() {
-  if (parkingSpots.length === 0) return console.warn("No parking spots found!");
+// Extract parking spots from nested JSON structurefunction 
+function extractParkingSpots(data) {
+  let spots = []; // This will store all the parking spots
 
-  parkingSpots.forEach(({ latitude, longitude, spotID, occupied }) => {
-    parkingCircles[spotID] = createParkingCircle(
-      latitude,
-      longitude,
-      spotID,
-      occupied
-    );
+  Object.values(data).forEach((street) => { 
+    // Loop through each street 
+    
+    Object.values(street).forEach((directionArray) => { 
+      // Loop through each directionArray
+      
+      spots.push(...directionArray); 
+      // Spread and add all parking spots to the final array
+    });
   });
-  //console.log("Parking Circles:", parkingCircles);
+
+  return spots; 
 }
 
-//Function that takes a parkingspot as parameter and creates a circle for it.
+
+// Update displayed parking spots
+function updateParkingSpots() {
+  if (parkingSpots.length === 0) {
+    return console.warn("No parking spots found!");
+  }
+
+  // Remove existing circles
+  Object.values(parkingCircles).forEach((circle) => map.removeLayer(circle));
+  parkingCircles = {}; // Clear previous circles
+
+  // Create new circles
+  parkingSpots.forEach(({ latitude, longitude, spotID, occupied }) => {
+    parkingCircles[spotID] = createParkingCircle(latitude, longitude, spotID, occupied);
+  });
+
+  console.log("Updated parking spots on the map.");
+}
+
+// Function that creates a circle for a parking spot
 function createParkingCircle(lat, lng, spotID, occupied) {
   const color = occupied ? "red" : "blue";
+  
   return L.circle([lat, lng], {
     color,
     fillColor: color === "red" ? "#f03" : "#3388ff",
@@ -52,21 +77,19 @@ function createParkingCircle(lat, lng, spotID, occupied) {
   }).addTo(map);
 }
 
+// Set up tile layer for the map
 function setupTileLayer() {
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 30,
-    attribution:
-      '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map);
 }
 
+// Handle map click event
 var popup = L.popup();
-
 function onMapClick(e) {
-    popup
-        .setLatLng(e.latlng)
-        .setContent("You clicked the map at " + e.latlng.toString())
-        .openOn(map);
+  popup.setLatLng(e.latlng)
+    .setContent("You clicked the map at " + e.latlng.toString())
+    .openOn(map);
 }
-
-map.on('click', onMapClick);
+map.on("click", onMapClick);
