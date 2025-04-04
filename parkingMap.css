@@ -1,40 +1,14 @@
-
 #map {
-  margin-top: 18px;
-    margin-right: 1px; /* Adjust this value as needed */
-    height: 80vh;
-    border-radius: 1%;}
-
-#symbolBar {
-    text-align: center;
+    margin-top: 18px;
+    width: 70vw; /* 100vw = 100% of the viewport width */
+    height: 70vh; /* 100vh = 100% of the viewport height */
+    border-radius: 1%;
 }
 
 #h1{
     font-family:Arial, Helvetica, sans-serif;
-    text-align: center;
 }
 
-#blueCircle{
-    height: 10px;
-    width: 10px;
-    background-color: #0062ff;
-    border-radius: 50%;
-    display: inline-block;
-    padding: 1rem 1rem;
-    vertical-align: middle;
-}
-#redCircle{
-    height: 10px;
-    width: 10px;
-    background-color: #ff0000;
-    border-radius: 50%;
-    display: inline-block;
-    padding: 1rem 1rem;
-    vertical-align: middle;
-}
-
-#symbolText{
-    display: inline-block;
-    padding: 1rem 1rem;
+#submitText{
     font-family:Arial, Helvetica, sans-serif;
 }

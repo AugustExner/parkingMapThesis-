@@ -15,13 +15,11 @@
 
   <body>
     <h1 id ="h1">Parking Map</h1>
-    <div id="symbolBar">
-      
-      <div id = "symbolText">Available spot</div>
-      <div id="blueCircle"></div>
-      <div id="redCircle"></div>
-      <div id = "symbolText">Occupied spot</div>
-    </div>
+    <form id="circleForm">
+      <label id="submitText" for="spotID">Enter SpotID to change color:</label>
+      <input type="number" id="spotID" name="spotID" required />
+      <button type="submit" id="toggleButton">Toggle Parking</button>
+    </form>
 
     <div id="map"></div>
 
