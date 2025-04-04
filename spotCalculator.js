@@ -46,6 +46,6 @@ const stepSize = 5;  // 5 meter mellem punkter
 const points = generatePoints(coord1, coord2, stepSize);
 
 // Brug JSON.stringify for at vise objekterne i et læsbart format
-console.log(JSON.stringify( points, null, 2));
+//console.log(JSON.stringify( points, null, 2));
 
 
