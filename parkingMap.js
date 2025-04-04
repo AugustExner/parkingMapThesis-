@@ -27,10 +27,55 @@ async function fetchParkingSpots() {
     const data = await response.json();
 
     // Extract all parking spots from nested structure
-    parkingSpots = extractParkingSpots(data.parkingSpots);
+    // parkingSpots = extractParkingSpots(data.parkingSpots);
 
     registeredCarArray = data.registeredCarsData;
     console.log("number of registeredCars", registeredCarArray.length);
+
+    northernSpots = data.northernSpots;
+    console.log("northernParkingSpots: ", northernSpots);
+    southernSpots = data.southernSpots;
+    console.log("southernParkingSpots: ", southernSpots);
+
+    easternSpots = data.easternSpots;
+    console.log("easternParkingSpots: ", easternSpots);
+
+    westernSpots = data.westernSpots;
+    console.log("westernParkingSpots: ", westernSpots);
+
+    northernSpots.forEach((spot) => {
+      createParkingCircle(
+        spot.latitude,
+        spot.longitude,
+        spot.spotID,
+        spot.occupied
+      );
+    });
+
+    southernSpots.forEach((spot) => {
+      createParkingCircle(
+        spot.latitude,
+        spot.longitude,
+        spot.spotID,
+        spot.occupied
+      );
+    });
+    easternSpots.forEach((spot) => {
+      createParkingCircle(
+        spot.latitude,
+        spot.longitude,
+        spot.spotID,
+        spot.occupied
+      );
+    });
+    westernSpots.forEach((spot) => {
+      createParkingCircle(
+        spot.latitude,
+        spot.longitude,
+        spot.spotID,
+        spot.occupied
+      );
+    });
 
     registeredCarArray.forEach((registedCar) => {
       drawRegisteredCars(
