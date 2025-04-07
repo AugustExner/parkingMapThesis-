@@ -43,6 +43,14 @@ async function fetchParkingSpots() {
     westernSpots = data.westernSpots;
     console.log("westernParkingSpots: ", westernSpots);
 
+    let totalSpots =
+      northernSpots.length +
+      southernSpots.length +
+      easternSpots.length +
+      westernSpots.length;
+
+    console.log("Total parking spots:", totalSpots);
+
     northernSpots.forEach((spot) => {
       createParkingCircle(
         spot.latitude,
