@@ -30,26 +30,27 @@ async function fetchParkingSpots() {
     // parkingSpots = extractParkingSpots(data.parkingSpots);
 
     registeredCarArray = data.registeredCarsData;
-    console.log("number of registeredCars", registeredCarArray.length);
+    console.log("RegisteredCars", registeredCarArray.length);
 
     northernSpots = data.northernSpots;
-    console.log("northernParkingSpots: ", northernSpots);
+    // console.log("northernParkingSpots: ", northernSpots);
+    
     southernSpots = data.southernSpots;
-    console.log("southernParkingSpots: ", southernSpots);
-
+    // console.log("southernParkingSpots: ", southernSpots);
+    
     easternSpots = data.easternSpots;
-    console.log("easternParkingSpots: ", easternSpots);
+    //console.log("easternParkingSpots: ", easternSpots);
 
     westernSpots = data.westernSpots;
-    console.log("westernParkingSpots: ", westernSpots);
+    // console.log("westernParkingSpots: ", westernSpots);
 
-    let totalSpots =
+    let totalDirectionalSpots =
       northernSpots.length +
       southernSpots.length +
       easternSpots.length +
       westernSpots.length;
 
-    console.log("Total parking spots:", totalSpots);
+    console.log("Total directional parking spots:", totalDirectionalSpots);
 
     northernSpots.forEach((spot) => {
       createParkingCircle(
