@@ -1,11 +1,14 @@
 const map = L.map("map").setView([56.17254, 10.189626], 18);
 let parkingSpots = [];
 let parkingCircles = {}; // Store circles by SpotID
-let walkingCoordsArray = [];
+let walkingCoordsArray = []; //Purple Circles
 let googleCoordsArray = [];
 
-let testArray1 = [];
-let testArray2 = [];
+//BLACK CIRCLES - GPS
+let gpsArray = [];
+
+//ORANGE CIRCLES - GROUND TRUTH
+let groundTruthArray = [];
 
 let registeredCarArray = [];
 
@@ -14,8 +17,28 @@ document.addEventListener("DOMContentLoaded", init);
 function init() {
   console.log("DOM fully loaded. Running fetchParkingSpots...");
   fetchParkingSpots();
+  fetchDetectedCars();
   setupTileLayer();
   drawWalkingCircles();
+}
+
+async function fetchDetectedCars() {
+  try {
+    const response = await fetch("http://localhost:8000/getDetectedCars");
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+    const data = await response.json();
+    detectedCars = data.detectedCars;
+
+    console.log("Number of detected cars", detectedCars.length);
+    console.log("detectedCars", detectedCars);
+
+    detectedCars.forEach((detectedCar) => {
+      detectedCarCricle(detectedCar.lat, detectedCar.lng, detectedCar.color);
+    });
+  } catch (error) {
+    console.error("Error fetching detected cars:", error);
+  }
 }
 
 // Fetch parking data from API
@@ -32,68 +55,90 @@ async function fetchParkingSpots() {
     registeredCarArray = data.registeredCarsData;
     console.log("RegisteredCars", registeredCarArray.length);
 
-    northernSpots = data.northernSpots;
-    // console.log("northernParkingSpots: ", northernSpots);
+    compass0 = data.compass0;
+    compass5 = data.compass5;
+    compass7 = data.compass7;
+
+    // allSpots = data.allSpots
+    // console.log("all parkingspots", allSpots);
+
+    console.log("compass0 parkingspots", compass0);
+    console.log("compass5 parkingspots", compass5);
+    console.log("compass7 parkingspots", compass7);
+
+    oldCoords = data.oldCoords;
+    console.log("oldCoords", oldCoords.length);
+    newCoords = data.newCoords;
+    console.log("newCoords", newCoords.length);
+
     
-    southernSpots = data.southernSpots;
-    // console.log("southernParkingSpots: ", southernSpots);
-    
-    easternSpots = data.easternSpots;
-    //console.log("easternParkingSpots: ", easternSpots);
+    // oldCoords.forEach((coordSet) => {
+    //   oldCoordsCircles(coordSet.lat, coordSet.lng);
+    // });
 
-    westernSpots = data.westernSpots;
-    // console.log("westernParkingSpots: ", westernSpots);
+    // newCoords.forEach((coordSet) => {
+    //   newCoordsCircle(coordSet.lat, coordSet.lng);
+    // });
 
-    let totalDirectionalSpots =
-      northernSpots.length +
-      southernSpots.length +
-      easternSpots.length +
-      westernSpots.length;
-
-    console.log("Total directional parking spots:", totalDirectionalSpots);
-
-    northernSpots.forEach((spot) => {
+    compass0.forEach((spot) => {
       createParkingCircle(
         spot.latitude,
         spot.longitude,
         spot.spotID,
-        spot.occupied
+        spot.occupied,
+        spot.color
       );
     });
 
-    southernSpots.forEach((spot) => {
+    compass5.forEach((spot) => {
       createParkingCircle(
         spot.latitude,
         spot.longitude,
         spot.spotID,
-        spot.occupied
-      );
-    });
-    easternSpots.forEach((spot) => {
-      createParkingCircle(
-        spot.latitude,
-        spot.longitude,
-        spot.spotID,
-        spot.occupied
-      );
-    });
-    westernSpots.forEach((spot) => {
-      createParkingCircle(
-        spot.latitude,
-        spot.longitude,
-        spot.spotID,
-        spot.occupied
+        spot.occupied,
+        spot.color
       );
     });
 
-    registeredCarArray.forEach((registedCar) => {
-      drawRegisteredCars(
-        registedCar.oldLat,
-        registedCar.oldLng,
-        registedCar.newLat,
-        registedCar.newLng
+    compass7.forEach((spot) => {
+      createParkingCircle(
+        spot.latitude,
+        spot.longitude,
+        spot.spotID,
+        spot.occupied,
+        spot.color
       );
     });
+
+    // compass0.forEach((spot) => {
+    //   parkingRadius(
+    //     spot.latitude,
+    //     spot.longitude,
+    //     spot.spotID,
+    //     spot.occupied,
+    //     spot.color
+    //   );
+    // });
+
+    // compass5.forEach((spot) => {
+    //   parkingRadius(
+    //     spot.latitude,
+    //     spot.longitude,
+    //     spot.spotID,
+    //     spot.occupied,
+    //     spot.color
+    //   );
+    // });
+
+    // compass7.forEach((spot) => {
+    //   parkingRadius(
+    //     spot.latitude,
+    //     spot.longitude,
+    //     spot.spotID,
+    //     spot.occupied,
+    //     spot.color
+    //   );
+    // });
 
     console.log("Total parking spots fetched:", parkingSpots.length);
     updateParkingSpots();
@@ -137,7 +182,7 @@ function updateParkingSpots() {
       longitude,
       spotID,
       occupied
-    );
+    ); 
   });
 
   console.log("Updated parking spots on the map.");
@@ -158,15 +203,38 @@ function drawRegisteredCars(oldLat, oldLng, newLat, newLng) {
 }
 
 // Function that creates a circle for a parking spot
-function createParkingCircle(lat, lng, spotID, occupied) {
-  const color = occupied ? "red" : "blue";
+function createParkingCircle(lat, lng, spotID, occupied, batchColor) {
+  const fillColor = occupied ? "#f03" : "#3388ff";
+  const strokeColor =
+    batchColor !== "none" ? batchColor : occupied ? "red" : "blue";
 
-  return L.circle([lat, lng], {
-    color,
-    fillColor: color === "red" ? "#f03" : "#3388ff",
+  const circle = L.circle([lat, lng], {
+    color: strokeColor, // Outer stroke color
+    fillColor: fillColor, // Inner fill color
     fillOpacity: 0.5,
     radius: 2,
   }).addTo(map);
+
+  circle.on("click", function () {
+    circle
+      .bindPopup(` SpotID: ${spotID} <br>Latitude: ${lat}<br>Longitude: ${lng}`)
+      .openPopup();
+  });
+}
+
+function detectedCarCricle(lat, lng, batchColor) {
+  var circle = L.circle([lat, lng], {
+    color: batchColor,
+    fillColor: "yellow",
+    fillOpacity: 0.3,
+    radius: 1,
+  }).addTo(map);
+
+  circle.on("click", function () {
+    circle
+      .bindPopup(`DetectedCar<br> Latitude: ${lat}<br>Longitude: ${lng}`)
+      .openPopup();
+  });
 }
 
 // Set up tile layer for the map
@@ -191,10 +259,10 @@ map.on("click", onMapClick);
 //Walking circles
 function walkingCircles(lat, lng) {
   var circle = L.circle([lat, lng], {
-    color: "black",
-    fillColor: "black",
+    color: "purple",
+    fillColor: "purple",
     fillOpacity: 0.5,
-    radius: 1,
+    radius: 0.5,
   }).addTo(map);
 }
 
@@ -202,20 +270,31 @@ function drawWalkingCircles() {
   walkingCoordsArray.forEach((coord) => {
     walkingCircles(coord.lat, coord.lng);
   });
+
   googleCoordsArray.forEach((coords) => {
     googleCircles(coords.lat, coords.lng);
   });
 
-  testArray1.forEach((coords) => {
-    testCircles1(coords.lat, coords.lng);
+  gpsArray.forEach((coords) => {
+    gpsCircles(coords.lat, coords.lng);
   });
-  testArray2.forEach((coords) => {
-    testCircles2(coords.lat, coords.lng);
+
+  groundTruthArray.forEach((coords) => {
+    groundTruthCircles(coords.lat, coords.lng);
   });
 }
 
 //Walking circles
-function googleCircles(lat, lng) {
+function gpsCircles(lat, lng) {
+  var circle = L.circle([lat, lng], {
+    color: "black",
+    fillColor: "black",
+    fillOpacity: 0.5,
+    radius: 1,
+  }).addTo(map);
+}
+
+function groundTruthCircles(lat, lng) {
   var circle = L.circle([lat, lng], {
     color: "orange",
     fillColor: "orange",
@@ -224,20 +303,37 @@ function googleCircles(lat, lng) {
   }).addTo(map);
 }
 
-function testCircles1(lat, lng) {
+function oldCoordsCircles(lat, lng) {
   var circle = L.circle([lat, lng], {
-    color: "orange",
-    fillColor: "orange",
-    fillOpacity: 0.5,
-    radius: 1,
+    color: "black",
+    fillColor: "black",
+    fillOpacity: 0.2,
+    radius: 5,
+  }).addTo(map);
+
+  circle.on("click", function () {
+    circle.bindPopup(`Latitude: ${lat}<br>Longitude: ${lng}`).openPopup();
+  });
+}
+
+function parkingRadius(lat, lng) {
+  var circle = L.circle([lat, lng], {
+    color: "blue",
+    fillColor: "black",
+    fillOpacity: 0,
+    radius: 10,
   }).addTo(map);
 }
 
-function testCircles2(lat, lng) {
+function newCoordsCircle(lat, lng) {
   var circle = L.circle([lat, lng], {
-    color: "purple",
-    fillColor: "purple",
-    fillOpacity: 0.5,
-    radius: 1,
+    color: "orange",
+    fillColor: "orange",
+    fillOpacity: 0.2,
+    radius: 4,
   }).addTo(map);
+
+  circle.on("click", function () {
+    circle.bindPopup(`Latitude: ${lat}<br>Longitude: ${lng}`).openPopup();
+  });
 }
